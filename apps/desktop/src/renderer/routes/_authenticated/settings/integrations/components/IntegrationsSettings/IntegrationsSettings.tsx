@@ -19,13 +19,9 @@ interface IntegrationsSettingsProps {
 	visibleItems?: SettingItemId[] | null;
 }
 
-interface GithubInstallation {
-	id: string;
-	accountLogin: string | null;
-	accountType: string | null;
-	suspended: boolean | null;
-	lastSyncedAt: Date | null;
-	createdAt: Date;
+interface GithubStatus {
+	available: boolean;
+	login: string | null;
 }
 
 export function IntegrationsSettings({
@@ -45,8 +41,7 @@ export function IntegrationsSettings({
 		[collections],
 	);
 
-	const [githubInstallation, setGithubInstallation] =
-		useState<GithubInstallation | null>(null);
+	const [githubStatus, setGithubStatus] = useState<GithubStatus | null>(null);
 	const [isLoadingGithub, setIsLoadingGithub] = useState(true);
 
 	const showLinear = isItemVisible(
@@ -58,35 +53,31 @@ export function IntegrationsSettings({
 		visibleItems,
 	);
 
-	const fetchGithubInstallation = useCallback(async () => {
+	const fetchGithubStatus = useCallback(async () => {
 		if (!activeOrganizationId) {
 			setIsLoadingGithub(false);
 			return;
 		}
 
 		try {
-			const result =
-				await apiTrpcClient.integration.github.getInstallation.query({
-					organizationId: activeOrganizationId,
-				});
-			setGithubInstallation(result);
+			const result = await apiTrpcClient.integration.github.status.query();
+			setGithubStatus(result);
 		} catch (err) {
-			console.error("[integrations] Failed to fetch GitHub installation:", err);
+			console.error("[integrations] Failed to fetch GitHub status:", err);
 		} finally {
 			setIsLoadingGithub(false);
 		}
 	}, [activeOrganizationId]);
 
 	useEffect(() => {
-		fetchGithubInstallation();
-	}, [fetchGithubInstallation]);
+		fetchGithubStatus();
+	}, [fetchGithubStatus]);
 
 	const linearConnection = integrations?.find((i) => i.provider === "linear");
 	const slackConnection = integrations?.find((i) => i.provider === "slack");
 	const isLinearConnected = !!linearConnection;
 	const isSlackConnected = !!slackConnection;
-	const isGithubConnected =
-		!!githubInstallation && !githubInstallation.suspended;
+	const isGithubConnected = githubStatus?.available === true;
 	const showSlack = isItemVisible(
 		SETTING_ITEM_ID.INTEGRATIONS_SLACK,
 		visibleItems,
@@ -139,7 +130,7 @@ export function IntegrationsSettings({
 						description="Connect repos and sync pull requests."
 						icon={<FaGithub className="size-5" />}
 						isConnected={isGithubConnected}
-						connectedOrgName={githubInstallation?.accountLogin}
+						connectedOrgName={githubStatus?.login}
 						isLoading={isLoadingGithub}
 						onManage={() => handleOpenWeb("/integrations/github")}
 					/>

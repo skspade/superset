@@ -6,12 +6,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@superset/ui/card";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { FaGithub } from "react-icons/fa";
 import { api } from "@/trpc/server";
-import { ConnectionControls } from "./components/ConnectionControls";
-import { ErrorHandler } from "./components/ErrorHandler";
+import { PullRequestList } from "./components/PullRequestList";
 import { RepositoryList } from "./components/RepositoryList";
 
 export default async function GitHubIntegrationPage() {
@@ -28,15 +27,13 @@ export default async function GitHubIntegrationPage() {
 		);
 	}
 
-	const installation = await trpc.integration.github.getInstallation.query({
-		organizationId: organization.id,
-	});
-	const isConnected = !!installation;
+	const status = await trpc.integration.github.status.query();
+	const myPrs = status.available
+		? await trpc.integration.github.myPullRequests.query()
+		: { authored: [], reviewRequested: [] };
 
 	return (
 		<div className="space-y-8">
-			<ErrorHandler />
-
 			<Link
 				href="/integrations"
 				className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -52,61 +49,81 @@ export default async function GitHubIntegrationPage() {
 				<div className="flex-1">
 					<div className="flex items-center gap-3">
 						<h1 className="text-2xl font-semibold">GitHub</h1>
-						{isConnected ? (
+						{status.available ? (
 							<Badge variant="default" className="gap-1">
 								<CheckCircle2 className="size-3" />
-								Connected
+								{status.login ? `@${status.login}` : "Connected"}
 							</Badge>
 						) : (
-							<Badge variant="secondary">Not Connected</Badge>
+							<Badge variant="destructive" className="gap-1">
+								<AlertTriangle className="size-3" />
+								gh CLI unavailable
+							</Badge>
 						)}
 					</div>
 					<p className="mt-1 text-muted-foreground">
-						Connect your GitHub repositories and sync pull requests. Track CI
-						status and reviews across your team.
+						Tracks your pull requests via the `gh` CLI on the API host. Repos
+						are linked when you create a project from a GitHub clone URL.
 					</p>
 				</div>
 			</div>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Connection</CardTitle>
-					<CardDescription>
-						Install the Superset GitHub App to connect your repositories.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<ConnectionControls
-						organizationId={organization.id}
-						isConnected={isConnected}
-					/>
-					{installation && (
-						<div className="mt-4 text-sm text-muted-foreground">
-							Connected to <strong>{installation.accountLogin}</strong> (
-							{installation.accountType})
-							{installation.suspended && (
-								<Badge variant="destructive" className="ml-2">
-									Suspended
-								</Badge>
-							)}
-						</div>
-					)}
-				</CardContent>
-			</Card>
-
-			{installation && (
+			{!status.available && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Repositories</CardTitle>
+						<CardTitle>Set up the GitHub CLI</CardTitle>
 						<CardDescription>
-							Repositories accessible through the GitHub App installation.
+							The API server can't reach an authenticated `gh` CLI.
 						</CardDescription>
 					</CardHeader>
-					<CardContent>
-						<RepositoryList organizationId={organization.id} />
+					<CardContent className="space-y-2 text-sm text-muted-foreground">
+						<p>
+							Install the GitHub CLI on the machine running the API (`brew
+							install gh` or see cli.github.com), then run{" "}
+							<code className="rounded bg-muted px-1 py-0.5">
+								gh auth login
+							</code>{" "}
+							once. The integration will detect the existing auth automatically.
+						</p>
 					</CardContent>
 				</Card>
 			)}
+
+			{status.available && (
+				<Card>
+					<CardHeader>
+						<CardTitle>My Pull Requests</CardTitle>
+						<CardDescription>
+							Open PRs from your GitHub account, fetched live via `gh`.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-6">
+						<PullRequestList
+							title="Authored"
+							prs={myPrs.authored}
+							emptyText="You don't have any open PRs."
+						/>
+						<PullRequestList
+							title="Awaiting your review"
+							prs={myPrs.reviewRequested}
+							emptyText="Nothing in your review queue."
+						/>
+					</CardContent>
+				</Card>
+			)}
+
+			<Card>
+				<CardHeader>
+					<CardTitle>Tracked Repositories</CardTitle>
+					<CardDescription>
+						Repos linked to projects in this organization. The sync job
+						refreshes their PRs every 10 minutes.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<RepositoryList organizationId={organization.id} />
+				</CardContent>
+			</Card>
 		</div>
 	);
 }
