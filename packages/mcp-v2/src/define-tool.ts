@@ -22,7 +22,7 @@ export interface McpToolCallEvent {
 	toolName: string;
 	userId: string;
 	organizationId: string;
-	source: "api-key" | "oauth";
+	source: "api-key" | "oauth" | "local";
 	clientLabel: string | null;
 	durationMs: number;
 	success: boolean;

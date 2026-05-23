@@ -1,9 +1,7 @@
-import { mintUserJwt } from "@superset/auth/server";
 import { dbWs } from "@superset/db/client";
 import {
 	automationRuns,
 	type SelectAutomation,
-	users,
 	v2Hosts,
 	v2UsersHosts,
 } from "@superset/db/schema";
@@ -15,6 +13,11 @@ import {
 } from "@superset/shared/workspace-launch";
 import { and, eq } from "drizzle-orm";
 import { RelayDispatchError, relayMutation } from "./relay-client";
+
+// Single-user fork: the relay/host-service no longer enforces user-scoped JWT
+// auth. Callers still pass a "jwt" through for protocol compatibility, but it's
+// a placeholder the host accepts unconditionally.
+const LOCAL_JWT = "local";
 
 type AgentRunResult =
 	| { kind: "terminal"; sessionId: string; label: string }
@@ -81,20 +84,7 @@ export async function dispatchAutomation(
 
 	let workspaceId: string | null = null;
 	try {
-		const [owner] = await dbWs
-			.select({ email: users.email })
-			.from(users)
-			.where(eq(users.id, automation.ownerUserId))
-			.limit(1);
-
-		const jwt = await mintUserJwt({
-			userId: automation.ownerUserId,
-			email: owner?.email,
-			organizationIds: [automation.organizationId],
-			scope: "automation-run",
-			runId: run.id,
-			ttlSeconds: 300,
-		});
+		const jwt = LOCAL_JWT;
 
 		const routingKey = buildHostRoutingKey(
 			automation.organizationId,

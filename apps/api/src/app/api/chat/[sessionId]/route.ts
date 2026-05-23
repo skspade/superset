@@ -28,7 +28,6 @@ export async function PUT(
 	{ params }: { params: Promise<{ sessionId: string }> },
 ): Promise<Response> {
 	const session = await requireAuth(request);
-	if (!session) return new Response("Unauthorized", { status: 401 });
 
 	const { sessionId } = await params;
 
@@ -132,8 +131,7 @@ export async function PATCH(
 	request: Request,
 	{ params }: { params: Promise<{ sessionId: string }> },
 ): Promise<Response> {
-	const session = await requireAuth(request);
-	if (!session) return new Response("Unauthorized", { status: 401 });
+	const _session = await requireAuth(request);
 
 	const { sessionId } = await params;
 	const body = (await request.json()) as { title?: string };

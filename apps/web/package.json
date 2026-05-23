@@ -13,7 +13,6 @@
 	},
 	"dependencies": {
 		"@sentry/nextjs": "10.46.0",
-		"@superset/auth": "workspace:*",
 		"@superset/db": "workspace:*",
 		"@superset/shared": "workspace:*",
 		"@superset/trpc": "workspace:*",
@@ -27,7 +26,6 @@
 		"@uiw/react-md-editor": "4.1.0",
 		"@xterm/addon-fit": "0.12.0-beta.219",
 		"@xterm/xterm": "6.1.0-beta.219",
-		"better-auth": "1.6.5",
 		"framer-motion": "12.38.0",
 		"geist": "1.7.0",
 		"import-in-the-middle": "2.0.1",

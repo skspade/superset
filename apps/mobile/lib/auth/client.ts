@@ -1,33 +1,59 @@
-import { expoClient } from "@better-auth/expo/client";
-import type { auth } from "@superset/auth/server";
-import {
-	customSessionClient,
-	organizationClient,
-} from "better-auth/client/plugins";
-import { createAuthClient } from "better-auth/react";
-import * as SecureStore from "expo-secure-store";
-import { env } from "../env";
+// Single-user fork: mobile app has no real auth. Expose stubs that satisfy
+// the existing call sites with the synthetic user.
 
-export const authClient = createAuthClient({
-	baseURL: env.EXPO_PUBLIC_API_URL,
-	plugins: [
-		expoClient({
-			scheme: "superset",
-			storagePrefix: "superset",
-			storage: SecureStore,
-		}),
-		organizationClient({
-			teams: { enabled: true },
-			schema: {
-				team: {
-					additionalFields: {
-						slug: { type: "string", input: true, required: true },
-					},
-				},
-			},
-		}),
-		customSessionClient<typeof auth>(),
-	],
+const SINGLE_USER_ID = "00000000-0000-0000-0000-000000000001";
+const SINGLE_ORG_ID = "00000000-0000-0000-0000-000000000002";
+
+const syntheticSession = {
+	user: {
+		id: SINGLE_USER_ID,
+		email: "local@superset.local",
+		name: "Local User",
+		image: null as string | null,
+		emailVerified: true,
+	},
+	session: {
+		id: "local",
+		userId: SINGLE_USER_ID,
+		activeOrganizationId: SINGLE_ORG_ID,
+		organizationIds: [SINGLE_ORG_ID],
+		token: "local",
+	},
+};
+
+type Session = typeof syntheticSession;
+
+interface AuthError {
+	message?: string;
+	code?: string;
+}
+
+const ok = async (..._args: unknown[]) => ({
+	data: { success: true },
+	error: null as AuthError | null,
 });
 
-export const { signIn, signOut, signUp, useSession } = authClient;
+export function useSession() {
+	return { data: syntheticSession, isPending: false, error: null };
+}
+
+export const authClient = {
+	useSession,
+	signIn: {
+		social: ok,
+		email: ok,
+	},
+	signOut: ok,
+	signUp: { email: ok },
+	organization: {
+		setActive: ok,
+		list: async () => ({ data: [], error: null as AuthError | null }),
+	},
+	getCookie: () => null,
+};
+
+export const signIn = authClient.signIn;
+export const signOut = authClient.signOut;
+export const signUp = authClient.signUp;
+
+export type AuthSession = Session;

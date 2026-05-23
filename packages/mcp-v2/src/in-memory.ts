@@ -1,9 +1,10 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { mintUserJwt } from "@superset/auth/server";
-import { db } from "@superset/db/client";
-import { members, users } from "@superset/db/schema";
-import { eq } from "drizzle-orm";
+import {
+	SINGLE_ORG_ID,
+	SINGLE_USER_EMAIL,
+	SINGLE_USER_ID,
+} from "@superset/shared/single-user";
 import type { McpContext } from "./auth";
 import type { McpToolCallEmitter } from "./define-tool";
 import { createMcpServer } from "./server";
@@ -17,16 +18,12 @@ export interface InMemoryClientOptions {
 }
 
 /**
- * Build an in-memory MCP client/server pair for server-side agent integrations
- * (the Slack agent, the automations dispatcher, etc.). Auth context is wired
- * directly through the SDK's documented `authInfo` option on each request —
- * no transport monkey-patching.
+ * Build an in-memory MCP client/server pair for server-side agent integrations.
  *
- * Callers MUST await the returned `cleanup()` to free the in-memory transport.
- * Use it inside a `try/finally` or with `await using` if your runtime supports it.
+ * Single-user fork: the supplied userId/organizationId arguments are accepted
+ * but always resolve to the local synthetic identity downstream.
  */
 export async function createInMemoryMcpClient({
-	userId,
 	organizationId,
 	clientLabel,
 	relayUrl,
@@ -35,43 +32,15 @@ export async function createInMemoryMcpClient({
 	client: Client;
 	cleanup: () => Promise<void>;
 }> {
-	const [user] = await db
-		.select({ email: users.email })
-		.from(users)
-		.where(eq(users.id, userId))
-		.limit(1);
-	if (!user) {
-		throw new Error(`User ${userId} not found`);
-	}
-	const memberships = await db
-		.select({ organizationId: members.organizationId })
-		.from(members)
-		.where(eq(members.userId, userId));
-	const organizationIds = [
-		...new Set(memberships.map((m) => m.organizationId)),
-	];
-	if (!organizationIds.includes(organizationId)) {
-		throw new Error(
-			`User ${userId} is not a member of organization ${organizationId}`,
-		);
-	}
-
-	const bearerToken = await mintUserJwt({
-		userId,
-		email: user.email,
-		organizationIds,
-		ttlSeconds: 300,
-	});
-
 	const mcpContext: McpContext = {
-		userId,
-		email: user.email,
-		organizationId,
-		organizationIds,
-		source: "api-key",
+		userId: SINGLE_USER_ID,
+		email: SINGLE_USER_EMAIL,
+		organizationId: organizationId || SINGLE_ORG_ID,
+		organizationIds: [SINGLE_ORG_ID],
+		source: "local",
 		clientLabel,
 		requestId: crypto.randomUUID(),
-		bearerToken,
+		bearerToken: "local",
 		relayUrl,
 	};
 

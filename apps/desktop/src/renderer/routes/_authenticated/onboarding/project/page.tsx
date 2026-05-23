@@ -44,7 +44,7 @@ function OnboardingProjectPage() {
 			// Reactive refetch (not imperative getSession) so the layout guards'
 			// useSession() sees onboardedAt before we navigate — otherwise the
 			// _authenticated guard bounces /v2-workspaces back to /onboarding.
-			await refetchSession({ query: { disableCookieCache: true } });
+			await refetchSession();
 		} catch (error) {
 			console.error("[onboarding] completeOnboarding failed", error);
 			toast.error("Could not finish onboarding. Please try again.");

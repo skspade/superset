@@ -1,22 +1,20 @@
 "use client";
 
-import { authClient } from "@superset/auth/client";
+import {
+	SINGLE_USER_EMAIL,
+	SINGLE_USER_ID,
+	SINGLE_USER_NAME,
+} from "@superset/shared/single-user";
 import posthog from "posthog-js";
 import { useEffect } from "react";
 
 export function PostHogUserIdentifier() {
-	const { data: session } = authClient.useSession();
-
 	useEffect(() => {
-		if (session?.user) {
-			posthog.identify(session.user.id, {
-				email: session.user.email,
-				name: session.user.name,
-			});
-		} else if (session === null) {
-			posthog.reset();
-		}
-	}, [session]);
+		posthog.identify(SINGLE_USER_ID, {
+			email: SINGLE_USER_EMAIL,
+			name: SINGLE_USER_NAME,
+		});
+	}, []);
 
 	return null;
 }

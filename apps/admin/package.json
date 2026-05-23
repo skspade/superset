@@ -12,7 +12,6 @@
 	},
 	"dependencies": {
 		"@sentry/nextjs": "10.46.0",
-		"@superset/auth": "workspace:*",
 		"@superset/db": "workspace:*",
 		"@superset/shared": "workspace:*",
 		"@superset/trpc": "workspace:*",
@@ -23,7 +22,6 @@
 		"@trpc/client": "11.16.0",
 		"@trpc/server": "11.16.0",
 		"@trpc/tanstack-react-query": "11.16.0",
-		"better-auth": "1.6.5",
 		"date-fns": "4.1.0",
 		"drizzle-orm": "0.45.2",
 		"import-in-the-middle": "2.0.1",

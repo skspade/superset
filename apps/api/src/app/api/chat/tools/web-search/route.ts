@@ -1,4 +1,4 @@
-import { auth } from "@superset/auth/server";
+import { SINGLE_USER_ID } from "@superset/shared/single-user";
 import { tavily } from "@tavily/core";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
@@ -14,15 +14,7 @@ const ratelimit = new Ratelimit({
 });
 
 export async function POST(request: Request): Promise<Response> {
-	const session = await auth.api.getSession({
-		headers: request.headers,
-	});
-
-	if (!session?.user) {
-		return new Response("Unauthorized", { status: 401 });
-	}
-
-	const { success } = await ratelimit.limit(session.user.id);
+	const { success } = await ratelimit.limit(SINGLE_USER_ID);
 	if (!success) {
 		return Response.json(
 			{ error: "Rate limit exceeded. Try again later." },

@@ -1,58 +1,31 @@
-import {
-	findOrgMembership,
-	findOrgMembershipWithSubscription,
-} from "@superset/db/utils";
-import { TRPCError } from "@trpc/server";
+import { SINGLE_ORG_ID, SINGLE_USER_ID } from "@superset/shared/single-user";
+
+// Single-user fork: every "verify" is satisfied by the synthetic identity. We
+// still return a membership-shaped object so existing callers that read
+// `.membership.role` keep working.
+
+const SYNTHETIC_MEMBERSHIP = {
+	id: SINGLE_USER_ID,
+	userId: SINGLE_USER_ID,
+	organizationId: SINGLE_ORG_ID,
+	role: "owner" as const,
+	createdAt: new Date(0),
+};
 
 export async function verifyOrgMembership(
-	userId: string,
-	organizationId: string,
+	_userId: string,
+	_organizationId: string,
 ) {
-	const membership = await findOrgMembership({ userId, organizationId });
-
-	if (!membership) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "Not a member of this organization",
-		});
-	}
-
-	return { membership };
+	return { membership: SYNTHETIC_MEMBERSHIP };
 }
 
-export async function verifyOrgAdmin(userId: string, organizationId: string) {
-	const { membership } = await verifyOrgMembership(userId, organizationId);
-
-	if (membership.role !== "admin" && membership.role !== "owner") {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "Admin access required",
-		});
-	}
-
-	return { membership };
+export async function verifyOrgAdmin(_userId: string, _organizationId: string) {
+	return { membership: SYNTHETIC_MEMBERSHIP };
 }
 
-/**
- * Like `verifyOrgMembership` but also returns the org's currently-paying
- * subscription, joined into the same DB statement (no extra round-trip).
- * Use when a procedure needs to gate on plan.
- */
 export async function verifyOrgMembershipWithSubscription(
-	userId: string,
-	organizationId: string,
+	_userId: string,
+	_organizationId: string,
 ) {
-	const result = await findOrgMembershipWithSubscription({
-		userId,
-		organizationId,
-	});
-
-	if (!result) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "Not a member of this organization",
-		});
-	}
-
-	return result;
+	return { membership: SYNTHETIC_MEMBERSHIP, subscription: null };
 }

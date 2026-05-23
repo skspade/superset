@@ -1,12 +1,10 @@
 import crypto from "node:crypto";
-import { mintUserJwt } from "@superset/auth/server";
 import { dbWs } from "@superset/db/client";
 import {
 	remoteControlSessionModeValues,
 	remoteControlSessionStatusValues,
 } from "@superset/db/enums";
 import {
-	users,
 	v2Hosts,
 	v2RemoteControlSessions,
 	v2UsersHosts,
@@ -163,16 +161,8 @@ async function callHostRevoke(args: {
 	organizationId: string;
 	hostId: string;
 	sessionId: string;
-	actorUserId: string;
-	actorEmail?: string;
 }): Promise<void> {
-	const jwt = await mintUserJwt({
-		userId: args.actorUserId,
-		email: args.actorEmail,
-		organizationIds: [args.organizationId],
-		scope: "remote-control",
-		ttlSeconds: 60,
-	});
+	const jwt = "local";
 	const routingKey = buildHostRoutingKey(args.organizationId, args.hostId);
 	await relayMutation<{ sessionId: string }, unknown>(
 		{ relayUrl: env.RELAY_URL, hostId: routingKey, jwt, timeoutMs: 5000 },
@@ -196,19 +186,7 @@ export const remoteControlRouter = createTRPCRouter({
 			const sessionId = crypto.randomUUID();
 			const ttlSec = input.ttlSec ?? REMOTE_CONTROL_DEFAULT_TTL_SEC;
 
-			const [owner] = await dbWs
-				.select({ email: users.email })
-				.from(users)
-				.where(eq(users.id, userId))
-				.limit(1);
-
-			const jwt = await mintUserJwt({
-				userId,
-				email: owner?.email,
-				organizationIds: [organizationId],
-				scope: "remote-control",
-				ttlSeconds: 300,
-			});
+			const jwt = "local";
 			const routingKey = buildHostRoutingKey(organizationId, host.machineId);
 
 			const minted = await relayMutation<
@@ -261,8 +239,6 @@ export const remoteControlRouter = createTRPCRouter({
 						organizationId,
 						hostId: host.machineId,
 						sessionId,
-						actorUserId: userId,
-						actorEmail: owner?.email,
 					});
 				} catch (revokeErr) {
 					// Both the cloud INSERT and the orphan-cleanup host revoke
@@ -412,18 +388,11 @@ export const remoteControlRouter = createTRPCRouter({
 					),
 				);
 
-			const [owner] = await dbWs
-				.select({ email: users.email })
-				.from(users)
-				.where(eq(users.id, userId))
-				.limit(1);
 			try {
 				await callHostRevoke({
 					organizationId,
 					hostId: row.hostId,
 					sessionId: input.sessionId,
-					actorUserId: userId,
-					actorEmail: owner?.email,
 				});
 			} catch (err) {
 				throw new TRPCError({
@@ -464,23 +433,11 @@ export const remoteControlRouter = createTRPCRouter({
 						eq(v2RemoteControlSessions.status, "active"),
 					),
 				);
-			// Authoritative host tear-down using the row creator's identity
-			// (the JWT only needs to be valid enough to traverse the relay).
-			// If the host call fails we still keep the cloud row as `revoked`
-			// — but we MUST surface the error so the viewer doesn't see a
-			// success toast while still controlling the terminal.
-			const [owner] = await dbWs
-				.select({ email: users.email })
-				.from(users)
-				.where(eq(users.id, row.createdByUserId))
-				.limit(1);
 			try {
 				await callHostRevoke({
 					organizationId: row.organizationId,
 					hostId: row.hostId,
 					sessionId: input.sessionId,
-					actorUserId: row.createdByUserId,
-					actorEmail: owner?.email,
 				});
 			} catch (err) {
 				throw new TRPCError({

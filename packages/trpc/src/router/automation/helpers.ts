@@ -18,10 +18,10 @@ export function currentPromptWindowBucket(): number {
 	return Math.floor(Date.now() / 1000 / PROMPT_VERSION_BUCKET_SECONDS);
 }
 
-export function promptSourceFromSession(session: {
-	session: { userAgent: string | null };
-}): AutomationPromptSource {
-	return session.session.userAgent === "mcp-v2" ? "agent" : "human";
+export function promptSourceFromSession(
+	_session: unknown,
+): AutomationPromptSource {
+	return "human";
 }
 
 export type AutomationDbExecutor =
