@@ -158,6 +158,14 @@ mock.module("@superset/shared/github-remote", () => ({
 	parseGitHubRemote: parseGitHubRemoteMock,
 }));
 
+const upsertGithubRepoFromCliMock = mock(
+	async () => githubReposFindResults.shift() ?? null,
+);
+
+mock.module("../integration/github/repo-upsert", () => ({
+	upsertGithubRepoFromCli: upsertGithubRepoFromCliMock,
+}));
+
 mock.module("@vercel/blob", () => ({
 	del: delMock,
 	put: mock(),
@@ -260,6 +268,7 @@ beforeEach(() => {
 
 	v2ProjectsFindFirst.mockClear();
 	githubReposFindFirst.mockClear();
+	upsertGithubRepoFromCliMock.mockClear();
 	membersFindMany.mockClear();
 	dbInsert.mockClear();
 	dbInsertValues.mockClear();

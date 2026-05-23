@@ -15,6 +15,7 @@ import { posthog } from "../../lib/analytics";
 import { fetchAndStoreGitHubAvatar } from "../../lib/github-avatar";
 import { generateImagePathname, uploadImage } from "../../lib/upload";
 import { jwtProcedure, protectedProcedure } from "../../trpc";
+import { upsertGithubRepoFromCli } from "../integration/github/repo-upsert";
 import { requireActiveOrgId } from "../utils/active-org";
 import {
 	requireOrgResourceAccess,
@@ -203,14 +204,10 @@ export const v2ProjectRouter = {
 				}
 				canonicalUrl = parsed.url;
 				githubOwner = parsed.owner;
-				const fullNameLower = `${parsed.owner}/${parsed.name}`.toLowerCase();
-				const repo = await dbWs.query.githubRepositories.findFirst({
-					columns: { id: true },
-					where: and(
-						eq(sql`lower(${githubRepositories.fullName})`, fullNameLower),
-						eq(githubRepositories.organizationId, input.organizationId),
-					),
-				});
+				const repo = await upsertGithubRepoFromCli(
+					`${parsed.owner}/${parsed.name}`,
+					input.organizationId,
+				);
 				linkedRepoId = repo?.id ?? null;
 			}
 
@@ -351,14 +348,10 @@ export const v2ProjectRouter = {
 				},
 			);
 
-			const fullNameLower = `${parsed.owner}/${parsed.name}`.toLowerCase();
-			const repo = await dbWs.query.githubRepositories.findFirst({
-				columns: { id: true },
-				where: and(
-					eq(sql`lower(${githubRepositories.fullName})`, fullNameLower),
-					eq(githubRepositories.organizationId, input.organizationId),
-				),
-			});
+			const repo = await upsertGithubRepoFromCli(
+				`${parsed.owner}/${parsed.name}`,
+				input.organizationId,
+			);
 
 			const [updated] = await dbWs
 				.update(v2Projects)
@@ -450,14 +443,10 @@ export const v2ProjectRouter = {
 				}
 				canonicalRepoCloneUrl = parsed.url;
 				if (input.githubRepositoryId === undefined) {
-					const fullNameLower = `${parsed.owner}/${parsed.name}`.toLowerCase();
-					const repo = await dbWs.query.githubRepositories.findFirst({
-						columns: { id: true },
-						where: and(
-							eq(sql`lower(${githubRepositories.fullName})`, fullNameLower),
-							eq(githubRepositories.organizationId, project.organizationId),
-						),
-					});
+					const repo = await upsertGithubRepoFromCli(
+						`${parsed.owner}/${parsed.name}`,
+						project.organizationId,
+					);
 					resolvedGithubRepositoryId = repo?.id ?? null;
 				}
 			}

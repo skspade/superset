@@ -8,11 +8,7 @@ import {
 	sessions,
 	users,
 } from "./auth";
-import {
-	githubInstallations,
-	githubPullRequests,
-	githubRepositories,
-} from "./github";
+import { githubPullRequests, githubRepositories } from "./github";
 import {
 	agentCommands,
 	chatSessions,
@@ -41,7 +37,6 @@ export const usersRelations = relations(users, ({ many }) => ({
 	createdTasks: many(tasks, { relationName: "creator" }),
 	assignedTasks: many(tasks, { relationName: "assignee" }),
 	connectedIntegrations: many(integrationConnections),
-	githubInstallations: many(githubInstallations),
 	devicePresence: many(devicePresence),
 	v2Hosts: many(v2Hosts),
 	v2Clients: many(v2Clients),
@@ -81,7 +76,6 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
 	tasks: many(tasks),
 	taskStatuses: many(taskStatuses),
 	integrations: many(integrationConnections),
-	githubInstallations: many(githubInstallations),
 	githubRepositories: many(githubRepositories),
 	githubPullRequests: many(githubPullRequests),
 	devicePresence: many(devicePresence),
@@ -166,28 +160,9 @@ export const integrationConnectionsRelations = relations(
 );
 
 // GitHub relations
-export const githubInstallationsRelations = relations(
-	githubInstallations,
-	({ one, many }) => ({
-		organization: one(organizations, {
-			fields: [githubInstallations.organizationId],
-			references: [organizations.id],
-		}),
-		connectedBy: one(users, {
-			fields: [githubInstallations.connectedByUserId],
-			references: [users.id],
-		}),
-		repositories: many(githubRepositories),
-	}),
-);
-
 export const githubRepositoriesRelations = relations(
 	githubRepositories,
 	({ one, many }) => ({
-		installation: one(githubInstallations, {
-			fields: [githubRepositories.installationId],
-			references: [githubInstallations.id],
-		}),
 		organization: one(organizations, {
 			fields: [githubRepositories.organizationId],
 			references: [organizations.id],

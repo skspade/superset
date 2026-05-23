@@ -74,14 +74,14 @@ export function RepositoryList({ organizationId }: RepositoryListProps) {
 		return (
 			<div className="flex flex-col items-center gap-4 py-8">
 				<p className="text-center text-muted-foreground">
-					No repositories found. Make sure your GitHub App has access to
-					repositories.
+					No repositories tracked yet. Repos appear here when you link them to a
+					project, or run a sync to refresh PR data.
 				</p>
 				<Button onClick={handleSync} disabled={isSyncing} variant="outline">
 					<RefreshCw
 						className={`mr-2 size-4 ${isSyncing ? "animate-spin" : ""}`}
 					/>
-					{isSyncing ? "Syncing..." : "Sync Repositories"}
+					{isSyncing ? "Syncing..." : "Sync Pull Requests"}
 				</Button>
 			</div>
 		);

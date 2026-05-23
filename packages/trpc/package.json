@@ -15,6 +15,10 @@
 		"./automation-dispatch": {
 			"types": "./src/router/automation/dispatch.ts",
 			"default": "./src/router/automation/dispatch.ts"
+		},
+		"./lib/gh": {
+			"types": "./src/lib/gh.ts",
+			"default": "./src/lib/gh.ts"
 		}
 	},
 	"scripts": {
