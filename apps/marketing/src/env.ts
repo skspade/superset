@@ -10,7 +10,6 @@ export const env = createEnv({
 			.default("development"),
 	},
 	server: {
-		BETTER_AUTH_SECRET: z.string(),
 		RESEND_API_KEY: z.string(),
 		KV_REST_API_URL: z.string(),
 		KV_REST_API_TOKEN: z.string(),

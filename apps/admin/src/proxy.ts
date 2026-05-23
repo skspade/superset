@@ -1,23 +1,8 @@
-import { auth } from "@superset/auth/server";
-import { COMPANY } from "@superset/shared/constants";
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { env } from "./env";
-
-export default async function proxy() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-
-	if (!session?.user) {
-		return NextResponse.redirect(new URL(env.NEXT_PUBLIC_WEB_URL));
-	}
-
-	if (!session.user.email.endsWith(COMPANY.EMAIL_DOMAIN)) {
-		return NextResponse.redirect(new URL(env.NEXT_PUBLIC_WEB_URL));
-	}
-
+// Single-user fork: admin app has no separate auth gate. Anyone running it
+// locally is the admin.
+export default function proxy() {
 	return NextResponse.next();
 }
 

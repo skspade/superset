@@ -1,6 +1,6 @@
-import { auth } from "@superset/auth/server";
 import { db } from "@superset/db/client";
 import { chatAttachments } from "@superset/db/schema";
+import { SINGLE_USER_ID } from "@superset/shared/single-user";
 import { head } from "@vercel/blob";
 import { eq } from "drizzle-orm";
 
@@ -18,14 +18,9 @@ function buildContentDisposition(filename: string, mediaType: string): string {
 }
 
 export async function GET(
-	request: Request,
+	_request: Request,
 	{ params }: { params: Promise<{ id: string }> },
 ): Promise<Response> {
-	const sessionData = await auth.api.getSession({ headers: request.headers });
-	if (!sessionData?.user) {
-		return new Response("Unauthorized", { status: 401 });
-	}
-
 	const { id } = await params;
 	if (!UUID_REGEX.test(id)) {
 		return new Response("Not found", { status: 404 });
@@ -42,7 +37,7 @@ export async function GET(
 		.where(eq(chatAttachments.id, id))
 		.limit(1);
 
-	if (!attachment || attachment.ownerId !== sessionData.user.id) {
+	if (!attachment || attachment.ownerId !== SINGLE_USER_ID) {
 		return new Response("Not found", { status: 404 });
 	}
 

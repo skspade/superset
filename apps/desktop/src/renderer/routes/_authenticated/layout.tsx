@@ -63,7 +63,7 @@ function AuthenticatedLayout() {
 	const isV2CloudEnabled = useIsV2CloudEnabled();
 
 	const isSignedIn = env.SKIP_ENV_VALIDATION || !!session?.user;
-	const activeOrganizationId = env.SKIP_ENV_VALIDATION
+	const _activeOrganizationId = env.SKIP_ENV_VALIDATION
 		? MOCK_ORG_ID
 		: session?.session?.activeOrganizationId;
 
@@ -188,14 +188,6 @@ function AuthenticatedLayout() {
 				</Button>
 			</div>
 		);
-	}
-
-	if (!isSignedIn) {
-		return <Navigate to="/sign-in" replace />;
-	}
-
-	if (!activeOrganizationId) {
-		return <Navigate to="/create-organization" replace />;
 	}
 
 	if (

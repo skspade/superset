@@ -1,27 +1,20 @@
 "use client";
 
-import { authClient } from "@superset/auth/client";
-import { useQuery } from "@tanstack/react-query";
+import {
+	SINGLE_USER_EMAIL,
+	SINGLE_USER_ID,
+	SINGLE_USER_NAME,
+} from "@superset/shared/single-user";
 import posthog from "posthog-js";
 import { useEffect } from "react";
-import { useTRPC } from "@/trpc/react";
 
 export function PostHogUserIdentifier() {
-	const { data: session } = authClient.useSession();
-	const trpc = useTRPC();
-
-	const { data: user } = useQuery({
-		...trpc.user.me.queryOptions(),
-		enabled: !!session?.user,
-	});
-
 	useEffect(() => {
-		if (user) {
-			posthog.identify(user.id, { email: user.email, name: user.name });
-		} else if (!session?.user) {
-			posthog.reset();
-		}
-	}, [user, session?.user]);
+		posthog.identify(SINGLE_USER_ID, {
+			email: SINGLE_USER_EMAIL,
+			name: SINGLE_USER_NAME,
+		});
+	}, []);
 
 	return null;
 }

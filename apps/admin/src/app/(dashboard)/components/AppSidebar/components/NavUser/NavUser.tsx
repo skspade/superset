@@ -1,6 +1,5 @@
 "use client";
 
-import { authClient } from "@superset/auth/client";
 import type { RouterOutputs } from "@superset/trpc";
 import { Avatar, AvatarFallback, AvatarImage } from "@superset/ui/avatar";
 import {
@@ -22,10 +21,8 @@ import {
 	LuBadgeCheck,
 	LuBell,
 	LuChevronsUpDown,
-	LuLogOut,
 	LuSettings,
 } from "react-icons/lu";
-import { env } from "@/env";
 
 export interface NavUserProps {
 	user: NonNullable<RouterOutputs["user"]["me"]>;
@@ -38,16 +35,6 @@ export function NavUser({ user }: NavUserProps) {
 		.split(" ")
 		.map((name) => name[0])
 		.join("");
-
-	const handleSignOut = async () => {
-		await authClient.signOut({
-			fetchOptions: {
-				onSuccess: () => {
-					window.location.href = env.NEXT_PUBLIC_WEB_URL;
-				},
-			},
-		});
-	};
 
 	return (
 		<SidebarMenu>
@@ -106,11 +93,6 @@ export function NavUser({ user }: NavUserProps) {
 								Notifications
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={handleSignOut}>
-							<LuLogOut />
-							Log out
-						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</SidebarMenuItem>

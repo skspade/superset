@@ -4,13 +4,10 @@ import { useMemo } from "react";
 import {
 	HiOutlineBeaker,
 	HiOutlineBell,
-	HiOutlineBuildingOffice2,
 	HiOutlineCommandLine,
 	HiOutlineComputerDesktop,
 	HiOutlineCpuChip,
-	HiOutlineCreditCard,
 	HiOutlineFolder,
-	HiOutlineKey,
 	HiOutlineLink,
 	HiOutlineLockClosed,
 	HiOutlinePaintBrush,
@@ -18,7 +15,6 @@ import {
 	HiOutlineShieldCheck,
 	HiOutlineSparkles,
 	HiOutlineUser,
-	HiOutlineUserGroup,
 } from "react-icons/hi2";
 import { LuBrain, LuGitBranch, LuKeyboard } from "react-icons/lu";
 import { useIsV2CloudEnabled } from "renderer/hooks/useIsV2CloudEnabled";
@@ -32,8 +28,6 @@ interface GeneralSettingsProps {
 
 type SettingsRoute =
 	| "/settings/account"
-	| "/settings/organization"
-	| "/settings/teams"
 	| "/settings/appearance"
 	| "/settings/ringtones"
 	| "/settings/keyboard"
@@ -45,8 +39,6 @@ type SettingsRoute =
 	| "/settings/models"
 	| "/settings/experimental"
 	| "/settings/integrations"
-	| "/settings/billing"
-	| "/settings/api-keys"
 	| "/settings/security"
 	| "/settings/permissions"
 	| "/settings/projects"
@@ -137,20 +129,8 @@ const SECTION_GROUPS: SectionGroup[] = [
 		],
 	},
 	{
-		label: "Organization",
+		label: "Workspace",
 		items: [
-			{
-				id: "/settings/organization",
-				section: "organization",
-				label: "Organization",
-				icon: <HiOutlineBuildingOffice2 className="h-4 w-4" />,
-			},
-			{
-				id: "/settings/teams",
-				section: "teams",
-				label: "Teams",
-				icon: <HiOutlineUserGroup className="h-4 w-4" />,
-			},
 			{
 				id: "/settings/projects",
 				section: "project",
@@ -168,18 +148,6 @@ const SECTION_GROUPS: SectionGroup[] = [
 				section: "integrations",
 				label: "Integrations",
 				icon: <HiOutlinePuzzlePiece className="h-4 w-4" />,
-			},
-			{
-				id: "/settings/billing",
-				section: "billing",
-				label: "Billing",
-				icon: <HiOutlineCreditCard className="h-4 w-4" />,
-			},
-			{
-				id: "/settings/api-keys",
-				section: "apikeys",
-				label: "API Keys",
-				icon: <HiOutlineKey className="h-4 w-4" />,
 			},
 		],
 	},
