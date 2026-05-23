@@ -1,9 +1,10 @@
-import { ACTIVE_SUBSCRIPTION_STATUSES } from "@superset/shared/billing";
 import { and, desc, eq, inArray } from "drizzle-orm";
 
 import { db } from "../client";
 import { members, type SelectMember } from "../schema/auth";
 import { type SelectSubscription, subscriptions } from "../schema/schema";
+
+const ACTIVE_SUBSCRIPTION_STATUSES = ["active", "trialing"] as const;
 
 export async function findOrgMembership({
 	userId,

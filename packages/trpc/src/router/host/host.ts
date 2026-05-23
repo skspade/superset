@@ -1,19 +1,14 @@
 import { db, dbWs } from "@superset/db/client";
 import {
-	subscriptions,
 	v2Clients,
 	v2ClientTypeValues,
 	v2Hosts,
 	v2UsersHosts,
 } from "@superset/db/schema";
-import {
-	ACTIVE_SUBSCRIPTION_STATUSES,
-	isActiveSubscriptionStatus,
-	isPaidPlan,
-} from "@superset/shared/billing";
+import { isPaidPlan } from "@superset/shared/billing";
 import { parseHostRoutingKey } from "@superset/shared/host-routing";
 import { TRPCError, type TRPCRouterRecord } from "@trpc/server";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { jwtProcedure, protectedProcedure } from "../../trpc";
 
@@ -183,17 +178,8 @@ export const hostRouter = {
 			const [row] = await db
 				.select({
 					hostId: v2UsersHosts.hostId,
-					subscriptionPlan: subscriptions.plan,
-					subscriptionStatus: subscriptions.status,
 				})
 				.from(v2UsersHosts)
-				.leftJoin(
-					subscriptions,
-					and(
-						eq(subscriptions.referenceId, v2UsersHosts.organizationId),
-						inArray(subscriptions.status, ACTIVE_SUBSCRIPTION_STATUSES),
-					),
-				)
 				.where(
 					and(
 						eq(v2UsersHosts.userId, ctx.userId),
@@ -201,14 +187,10 @@ export const hostRouter = {
 						eq(v2UsersHosts.hostId, parsed.machineId),
 					),
 				)
-				.orderBy(desc(subscriptions.createdAt))
 				.limit(1);
 
 			const allowed = !!row;
-			const paidPlan =
-				!!row &&
-				isPaidPlan(row.subscriptionPlan) &&
-				isActiveSubscriptionStatus(row.subscriptionStatus);
+			const paidPlan = !!row && isPaidPlan(null);
 			return { allowed, paidPlan };
 		}),
 

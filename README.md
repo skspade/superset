@@ -104,7 +104,7 @@ cp .env.example .env
 cp apps/electric-proxy/.dev.vars.example apps/electric-proxy/.dev.vars
 ```
 
-`.env.example` already contains working defaults for the local Postgres + Electric stack (see step 3). Edit `.env` to fill in any third-party integration keys you need (Sentry, Stripe, etc.) — all are optional for a local-only setup.
+`.env.example` already contains working defaults for the local Postgres + Electric stack (see step 3). Edit `.env` to fill in any third-party integration keys you need (Sentry, etc.) — all are optional for a local-only setup.
 
 **3. Start the local Postgres + Electric stack**
 

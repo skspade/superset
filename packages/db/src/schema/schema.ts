@@ -231,7 +231,7 @@ export type InsertIntegrationConnection =
 export type SelectIntegrationConnection =
 	typeof integrationConnections.$inferSelect;
 
-// Stripe subscriptions (org-based billing)
+// Subscriptions (org-based billing)
 export const subscriptions = pgTable(
 	"subscriptions",
 	{
@@ -240,8 +240,6 @@ export const subscriptions = pgTable(
 		referenceId: uuid("reference_id")
 			.notNull()
 			.references(() => organizations.id, { onDelete: "cascade" }),
-		stripeCustomerId: text("stripe_customer_id"),
-		stripeSubscriptionId: text("stripe_subscription_id"),
 		status: text().default("incomplete").notNull(),
 		periodStart: timestamp("period_start"),
 		periodEnd: timestamp("period_end"),
@@ -253,7 +251,6 @@ export const subscriptions = pgTable(
 		endedAt: timestamp("ended_at"),
 		seats: integer(),
 		billingInterval: text("billing_interval"),
-		stripeScheduleId: text("stripe_schedule_id"),
 		createdAt: timestamp("created_at").notNull().defaultNow(),
 		updatedAt: timestamp("updated_at")
 			.notNull()
@@ -262,7 +259,6 @@ export const subscriptions = pgTable(
 	},
 	(table) => [
 		index("subscriptions_reference_id_idx").on(table.referenceId),
-		index("subscriptions_stripe_customer_id_idx").on(table.stripeCustomerId),
 		index("subscriptions_status_idx").on(table.status),
 	],
 );
