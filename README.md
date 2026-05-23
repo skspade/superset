@@ -97,21 +97,30 @@ git clone https://github.com/superset-sh/superset.git
 cd superset
 ```
 
-**2. Set up environment variables** (choose one):
+**2. Set up environment variables**
 
-Option A: Full setup
 ```bash
 cp .env.example .env
-# Edit .env and fill in the values
+cp apps/electric-proxy/.dev.vars.example apps/electric-proxy/.dev.vars
 ```
 
-Option B: Skip env validation (for quick local testing)
+`.env.example` already contains working defaults for the local Postgres + Electric stack (see step 3). Edit `.env` to fill in any third-party integration keys you need (Sentry, Stripe, etc.) — all are optional for a local-only setup.
+
+**3. Start the local Postgres + Electric stack**
+
 ```bash
-cp .env.example .env
-echo 'SKIP_ENV_VALIDATION=1' >> .env
+docker compose up -d
 ```
 
-**3. Set up Caddy** (reverse proxy for Electric SQL streams):
+This brings up Postgres 16 (with logical replication enabled) on port 5432 and Electric on port 3069, matching the defaults in `.env.example` and `apps/electric-proxy/.dev.vars`.
+
+**4. Apply database migrations**
+
+```bash
+cd packages/db && bunx drizzle-kit migrate && cd ../..
+```
+
+**5. Set up Caddy** (reverse proxy for Electric SQL streams):
 
 ```bash
 # Install caddy: brew install caddy (macOS) or see https://caddyserver.com/docs/install
@@ -122,14 +131,14 @@ cp Caddyfile.example Caddyfile
 caddy trust
 ```
 
-**4. Install dependencies and run**
+**6. Install dependencies and run**
 
 ```bash
 bun install
 bun run dev
 ```
 
-**5. Build the desktop app**
+**7. Build the desktop app**
 
 ```bash
 bun run build
@@ -225,7 +234,7 @@ This repo uses the published upstream `mastracode` and `@mastra/*` packages dire
   <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-%23646CFF.svg?logo=vite&logoColor=white" alt="Vite" /></a>
   <a href="https://biomejs.dev/"><img src="https://img.shields.io/badge/Biome-339AF0?logo=biome&logoColor=white" alt="Biome" /></a>
   <a href="https://orm.drizzle.team/"><img src="https://img.shields.io/badge/Drizzle%20ORM-FFE873?logo=drizzle&logoColor=black" alt="Drizzle ORM" /></a>
-  <a href="https://neon.tech/"><img src="https://img.shields.io/badge/Neon-00E9CA?logo=neon&logoColor=white" alt="Neon" /></a>
+  <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-336791?logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
   <a href="https://trpc.io/"><img src="https://img.shields.io/badge/tRPC-2596BE?logo=trpc&logoColor=white" alt="tRPC" /></a>
 </p>
 
