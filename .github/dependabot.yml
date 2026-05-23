@@ -9,3 +9,11 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "monthly"
+    # Supply-chain defense: hold updates until versions have aged. Mirrors
+    # the `minimumReleaseAge` in bunfig.toml so the lockfile and Dependabot
+    # PRs agree on what's eligible. Security updates bypass cooldown.
+    cooldown:
+      default-days: 7
+      semver-major-days: 7
+      semver-minor-days: 7
+      semver-patch-days: 7
