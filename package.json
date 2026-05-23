@@ -24,6 +24,7 @@
 		"dev:marketing": "turbo dev --filter=@superset/marketing --filter=@superset/docs",
 		"build": "turbo build --filter=@superset/desktop",
 		"test": "turbo test --concurrency=2",
+		"test:e2e": "turbo run test:e2e --filter=@superset/web",
 		"lint": "./scripts/lint.sh",
 		"check:desktop-git-env": "./scripts/check-desktop-git-env.sh",
 		"lint:fix": "bunx @biomejs/biome@2.4.2 migrate --write && bunx @biomejs/biome@2.4.2 check --write --unsafe .",

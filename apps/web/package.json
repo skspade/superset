@@ -8,6 +8,7 @@
 		"clean": "git clean -xdf .cache .next .turbo node_modules",
 		"dev": "dotenv -e ../../.env -- sh -c 'exec next dev --port ${WEB_PORT:-3000}'",
 		"start": "next start",
+		"test:e2e": "playwright test",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -45,6 +46,7 @@
 		"zod": "4.3.6"
 	},
 	"devDependencies": {
+		"@playwright/test": "1.60.0",
 		"@superset/typescript": "workspace:*",
 		"@tailwindcss/postcss": "4.2.2",
 		"@types/node": "24.12.0",
