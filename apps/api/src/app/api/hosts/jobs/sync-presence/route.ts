@@ -104,7 +104,7 @@ export async function POST(request: Request): Promise<Response> {
 				AND h.is_online IS DISTINCT FROM d.expected
 			RETURNING h.organization_id, h.machine_id, h.is_online
 		`);
-		rows = result.rows;
+		rows = [...result];
 	} catch (error) {
 		console.error("[sync-presence] reconcile UPDATE failed:", error);
 		return Response.json({ error: "Reconcile write failed" }, { status: 502 });
