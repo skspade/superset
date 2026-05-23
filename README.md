@@ -1,3 +1,5 @@
+> **This is a modified personal fork of [Superset](https://github.com/superset-sh/superset), maintained by [@skspade](https://github.com/skspade).** It is not affiliated with or endorsed by Superset, Inc. Substantive modifications from upstream include: authentication and multi-tenant SaaS plumbing removed; the GitHub App integration replaced with the `gh` CLI; the remote Neon Postgres dependency replaced with a local Postgres + Electric stack run via Docker; Playwright added for local agent self-verification. Distributed under the Elastic License 2.0 (ELv2) — see [LICENSE.md](LICENSE.md).
+
 <div align="center">
 
 <img width="full" alt="Superset" src="apps/marketing/public/images/readme-hero.png" />
